@@ -1,3 +1,20 @@
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN
+        SELECT c.relname AS partition_name
+        FROM pg_inherits
+        JOIN pg_class c ON c.oid = inhrelid
+        JOIN pg_class p ON p.oid = inhparent
+        WHERE p.relname = 'otpusnalista'
+    LOOP
+        EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.partition_name) || ' CASCADE';
+    END LOOP;
+END $$;
+
+DROP VIEW IF EXISTS vw_registrovanipacijent_full;
+DROP TABLE IF EXISTS registrovanipacijent_details;
 DROP VIEW IF EXISTS vw_lek_json;
 DROP TABLE IF EXISTS stavkaistorije;
 DROP TABLE IF EXISTS procedurazaistorija;
@@ -223,7 +240,7 @@ CREATE TABLE nalogzadavanjeinjekcija (
     sifranalogainj VARCHAR(20) PRIMARY KEY,
     brprotokola VARCHAR(20) NOT NULL,
     sifrauputasl VARCHAR(20) NOT NULL,
-    brlicenceizvrsio VARCHAR(20) NOT NULL,
+    brlicenceizvrsio VARCHAR(20),
     FOREIGN KEY (sifrauputasl) REFERENCES uputzastacionarnolecenje (sifrauputasl),
     FOREIGN KEY (brlicenceizvrsio) REFERENCES medicinskitehnicar (brlicence)
 );
@@ -231,11 +248,11 @@ CREATE TABLE nalogzadavanjeinjekcija (
 CREATE TABLE stavkanalogazadavanjeinjekcija (
     brstavke INT,
     sifranalogainj VARCHAR(20),
-    jkl VARCHAR(10),
-    datumvreme TIMESTAMP NOT NULL,
+    jkl VARCHAR(10) NOT NULL,
+    datumvreme TIMESTAMP,
     propisanoampula INT NOT NULL,
     datoampula INT,
-    PRIMARY KEY (brstavke, sifranalogainj, jkl),
+    PRIMARY KEY (brstavke, sifranalogainj),
     FOREIGN KEY (sifranalogainj) REFERENCES nalogzadavanjeinjekcija (sifranalogainj),
     FOREIGN KEY (jkl) REFERENCES lek (jkl)
 );
@@ -279,11 +296,11 @@ CREATE TABLE istorijabolesti (
 CREATE TABLE stavkaistorije (
     brstavkeistorije INT,
     brojistorije VARCHAR(20),
-    jkl VARCHAR(10),
+    jkl VARCHAR(10) NOT NULL,
     datumvreme TIMESTAMP NOT NULL,
     toknalazi TEXT NOT NULL,
     doza NUMERIC(7, 2) NOT NULL,
-    PRIMARY KEY (brstavkeistorije, brojistorije, jkl),
+    PRIMARY KEY (brstavkeistorije, brojistorije),
     FOREIGN KEY (brojistorije) REFERENCES istorijabolesti (brojistorije),
     FOREIGN KEY (jkl) REFERENCES lek (jkl)
 );
@@ -336,6 +353,11 @@ CREATE OR REPLACE TRIGGER trigger_new_dijagnoza
 AFTER INSERT OR UPDATE ON dijagnoza
 FOR EACH ROW
 EXECUTE FUNCTION notify_new_dijagnoza();
+
+CREATE INDEX idx_dijagnoza_embedding_ivfflat
+ON dijagnoza
+USING ivfflat (embedding vector_cosine_ops)
+WITH (lists = 100);
 
 ALTER TABLE stavkanalogazadavanjeinjekcija
 ADD COLUMN IF NOT EXISTS naziv VARCHAR(100);
@@ -678,7 +700,7 @@ BEGIN
         END LOOP;
     END LOOP;
 
-    RETURN NULL;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -767,7 +789,7 @@ BEGIN
         END LOOP;
     END LOOP;
 
-    RETURN NULL;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -795,7 +817,7 @@ BEGIN
 
     DELETE FROM lek WHERE jkl = jkl_val;
 
-    RETURN NULL;
+    RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -1653,3 +1675,294 @@ INSERT INTO stavkanalogazadavanjeinjekcija (brstavke, sifranalogainj, jkl, datum
 (1, 'NAJ001', '3801150', '2026-01-06 08:00:00', 1, 1),
 (1, 'NAJ002', '3801170', '2026-02-11 08:00:00', 1, 1),
 (2, 'NAJ002', '3801170', '2026-02-12 08:00:00', 1, 1);
+
+ALTER TABLE stavkanalogazadavanjeinjekcija
+ADD COLUMN IF NOT EXISTS doza NUMERIC(7,2);
+
+UPDATE stavkanalogazadavanjeinjekcija s
+SET doza = s.datoampula * l.jacina
+FROM lek l
+WHERE s.jkl = l.jkl
+  AND (s.doza IS NULL OR s.doza <> s.datoampula * l.jacina);
+
+CREATE OR REPLACE FUNCTION func_calculate_doza_stavkanalogainj()
+RETURNS TRIGGER AS
+$$
+DECLARE
+    v_jacina NUMERIC(7,2);
+BEGIN
+    SELECT jacina
+    INTO v_jacina
+    FROM lek
+    WHERE jkl = NEW.jkl;
+
+    IF v_jacina IS NULL THEN
+        RAISE EXCEPTION 'Ne postoji lek sa JKL = %', NEW.jkl;
+    END IF;
+
+    NEW.doza := NEW.datoampula * v_jacina;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_calculate_doza_stavkanalogainj
+BEFORE INSERT OR UPDATE OF datoampula, jkl
+ON stavkanalogazadavanjeinjekcija
+FOR EACH ROW
+EXECUTE FUNCTION func_calculate_doza_stavkanalogainj();
+
+CREATE OR REPLACE FUNCTION func_calculate_doza_after_update_jacina_in_lek()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    UPDATE stavkanalogazadavanjeinjekcija
+    SET doza = datoampula * NEW.jacina
+    WHERE jkl = NEW.jkl
+      AND doza IS DISTINCT FROM (datoampula * NEW.jacina);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_calculate_doza_after_update_jacina_in_lek
+AFTER UPDATE OF jacina
+ON lek
+FOR EACH ROW
+EXECUTE FUNCTION func_calculate_doza_after_update_jacina_in_lek();
+
+ALTER TABLE istorijabolesti
+ADD COLUMN IF NOT EXISTS vrstaotpusta VARCHAR(100);
+
+UPDATE istorijabolesti i
+SET vrstaotpusta = v.naziv
+FROM vrstaotpusta v
+WHERE i.sifravrsteot = v.sifravrsteot;
+
+ALTER TABLE istorijabolesti
+DROP COLUMN IF EXISTS sifravrsteot;
+
+DROP TABLE IF EXISTS vrstaotpusta;
+
+ALTER TABLE istorijabolesti
+DROP CONSTRAINT IF EXISTS chk_istorija_vrstaot_allowed;
+
+ALTER TABLE istorijabolesti
+ADD CONSTRAINT chk_istorija_vrstaot_allowed CHECK (vrstaotpusta IN (
+ 'Otpust kući','Otpust/premeštaj u drugu zdravstvenu ustanovu za kratkotrajnu hospitalizaciju','Otpust/premeštaj u drugu zdravstvenu ustanovu','Statistički otpust','	Otpušten na sopstveni zahtev','Umro'
+));
+
+CREATE OR REPLACE PROCEDURE proc_update_allowed_vrsteot(new_values text[])
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+  v_violators text[];
+  in_list text;
+  sql text;
+BEGIN
+  IF array_length(new_values,1) IS NULL THEN
+    RAISE EXCEPTION 'Niz sa novim vrednostima ne sme biti prazan';
+  END IF;
+
+  SELECT array_agg(DISTINCT vrstaotpusta) INTO v_violators
+  FROM istorijabolesti
+  WHERE vrstaotpusta IS NOT NULL
+    AND NOT (vrstaotpusta = ANY (new_values));
+
+  IF v_violators IS NOT NULL THEN
+    RAISE EXCEPTION 'Ne mogu postaviti novo ograničenje: postojeće vrednosti nisu u novom nizu vrednosti: %', v_violators;
+  END IF;
+
+  in_list := array_to_string(ARRAY(SELECT quote_literal(trim(v)) FROM unnest(new_values) v), ',');
+  sql := format('ALTER TABLE istorijabolesti DROP CONSTRAINT IF EXISTS chk_istorija_vrstaot_allowed; ALTER TABLE istorijabolesti ADD CONSTRAINT chk_istorija_vrstaot_allowed CHECK (vrstaotpusta IN (%s))', in_list);
+  EXECUTE sql;
+END;
+$$;
+
+-- SELECT pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE conname = 'chk_istorija_vrstaot_allowed';
+
+CREATE TABLE IF NOT EXISTS registrovanipacijent_details (
+    jmbg CHAR(13) PRIMARY KEY,
+    posao VARCHAR(100),
+    adresa VARCHAR(200),
+    imeroditelja VARCHAR(50),
+    datumrodjenja DATE NOT NULL,
+    brlicencetehnicardodao VARCHAR(20) NOT NULL,
+    FOREIGN KEY (jmbg) REFERENCES registrovanipacijent (jmbg) ON DELETE CASCADE,
+    FOREIGN KEY (brlicencetehnicardodao) REFERENCES medicinskitehnicar (brlicence)
+);
+
+INSERT INTO registrovanipacijent_details (jmbg, posao, adresa, imeroditelja, datumrodjenja, brlicencetehnicardodao)
+SELECT jmbg, posao, adresa, imeroditelja, datumrodjenja, brlicencetehnicardodao
+FROM registrovanipacijent
+WHERE (posao IS NOT NULL OR adresa IS NOT NULL OR imeroditelja IS NOT NULL OR datumrodjenja IS NOT NULL OR brlicencetehnicardodao IS NOT NULL)
+ON CONFLICT (jmbg) DO NOTHING;
+
+ALTER TABLE registrovanipacijent
+    DROP COLUMN IF EXISTS posao,
+    DROP COLUMN IF EXISTS adresa,
+    DROP COLUMN IF EXISTS imeroditelja,
+    DROP COLUMN IF EXISTS datumrodjenja,
+    DROP COLUMN IF EXISTS brlicencetehnicardodao;
+
+CREATE OR REPLACE VIEW vw_registrovanipacijent_full AS
+SELECT r.jmbg, r.pol, d.imeroditelja, d.datumrodjenja, d.posao, r.lbo, r.brknjizice, d.adresa, r.ppt, d.brlicencetehnicardodao, r.brlicenceizbranidoktor
+FROM registrovanipacijent r
+LEFT JOIN registrovanipacijent_details d ON r.jmbg = d.jmbg;
+
+REVOKE INSERT, UPDATE, DELETE ON registrovanipacijent FROM PUBLIC;
+REVOKE INSERT, UPDATE, DELETE ON registrovanipacijent_details FROM PUBLIC;
+
+CREATE OR REPLACE FUNCTION func_vw_registrovanipacijent_full_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO registrovanipacijent (jmbg, pol, lbo, brknjizice, ppt, brlicenceizbranidoktor)
+    VALUES (NEW.jmbg, NEW.pol, NEW.lbo, NEW.brknjizice, NEW.ppt, NEW.brlicenceizbranidoktor);
+
+    INSERT INTO registrovanipacijent_details (jmbg, posao, adresa, imeroditelja, datumrodjenja, brlicencetehnicardodao)
+    VALUES (NEW.jmbg, NEW.posao, NEW.adresa, NEW.imeroditelja, NEW.datumrodjenja, NEW.brlicencetehnicardodao)
+    ON CONFLICT (jmbg) DO UPDATE
+      SET posao = EXCLUDED.posao,
+          adresa = EXCLUDED.adresa,
+          imeroditelja = EXCLUDED.imeroditelja,
+	  datumrodjenja = EXCLUDED.datumrodjenja,
+          brlicencetehnicardodao = EXCLUDED.brlicencetehnicardodao;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_vw_registrovanipacijent_full_insert
+INSTEAD OF INSERT ON vw_registrovanipacijent_full
+FOR EACH ROW EXECUTE FUNCTION func_vw_registrovanipacijent_full_insert();
+
+CREATE OR REPLACE FUNCTION func_vw_registrovanipacijent_full_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE registrovanipacijent
+    SET pol = NEW.pol,
+        lbo = NEW.lbo,
+        brknjizice = NEW.brknjizice,
+        ppt = NEW.ppt,
+        brlicenceizbranidoktor = NEW.brlicenceizbranidoktor
+    WHERE jmbg = NEW.jmbg;
+
+    INSERT INTO registrovanipacijent_details (jmbg, posao, adresa, imeroditelja, datumrodjenja, brlicencetehnicardodao)
+    VALUES (NEW.jmbg, NEW.posao, NEW.adresa, NEW.imeroditelja, NEW.datumrodjenja, NEW.brlicencetehnicardodao)
+    ON CONFLICT (jmbg) DO UPDATE
+      SET posao = EXCLUDED.posao,
+          adresa = EXCLUDED.adresa,
+          imeroditelja = EXCLUDED.imeroditelja,
+	  datumrodjenja = EXCLUDED.datumrodjenja,
+          brlicencetehnicardodao = EXCLUDED.brlicencetehnicardodao;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_vw_registrovanipacijent_full_update
+INSTEAD OF UPDATE ON vw_registrovanipacijent_full
+FOR EACH ROW EXECUTE FUNCTION func_vw_registrovanipacijent_full_update();
+
+CREATE OR REPLACE FUNCTION func_vw_registrovanipacijent_full_delete()
+RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM registrovanipacijent_details WHERE jmbg = OLD.jmbg;
+    DELETE FROM registrovanipacijent WHERE jmbg = OLD.jmbg;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_vw_registrovanipacijent_full_delete
+INSTEAD OF DELETE ON vw_registrovanipacijent_full
+FOR EACH ROW EXECUTE FUNCTION func_vw_registrovanipacijent_full_delete();
+
+ALTER TABLE otpusnalista RENAME TO otpusnalista_old;
+
+CREATE TABLE otpusnalista (
+    sifraotpustneliste VARCHAR(20) NOT NULL,
+    predlog TEXT NOT NULL,
+    epikriza TEXT NOT NULL,
+    datumvreme TIMESTAMP NOT NULL,
+    lecenod DATE NOT NULL,
+    lecendo DATE NOT NULL,
+    brojistorije VARCHAR(20) NOT NULL,
+    sifradijagnozekonacna VARCHAR(10) NOT NULL,
+    jmbg CHAR(13),
+    PRIMARY KEY (datumvreme, sifraotpustneliste),
+    FOREIGN KEY (brojistorije) REFERENCES istorijabolesti (brojistorije),
+    FOREIGN KEY (sifradijagnozekonacna) REFERENCES dijagnoza (sifradijagnoze)
+)
+PARTITION BY RANGE (datumvreme);
+
+DO $$
+DECLARE
+    godina int;
+    min_god int := 2020;
+    max_god int;
+    sql text;
+BEGIN
+    max_god := EXTRACT(YEAR FROM current_date)::int;
+
+    FOR godina IN min_god..max_god LOOP
+        sql := format('
+            CREATE TABLE IF NOT EXISTS otpusnalista_%s PARTITION OF otpusnalista
+            FOR VALUES FROM (%L) TO (%L);',
+            godina,
+            make_date(godina, 1, 1),
+            make_date(godina + 1, 1, 1)
+        );
+        EXECUTE sql;
+    END LOOP;
+END$$;
+
+INSERT INTO otpusnalista
+SELECT *
+FROM otpusnalista_old;
+
+DROP TABLE IF EXISTS otpusnalista_old;
+
+CREATE OR REPLACE TRIGGER trg_insert_otpusna
+BEFORE INSERT ON otpusnalista
+FOR EACH ROW
+EXECUTE FUNCTION func_populate_jmbg_otpusna();
+
+CREATE OR REPLACE TRIGGER trg_update_brojistorije_otpusna
+BEFORE UPDATE OF brojistorije ON otpusnalista
+FOR EACH ROW
+EXECUTE FUNCTION func_populate_jmbg_otpusna();
+
+CREATE OR REPLACE TRIGGER trg_deny_update_jmbg_otpusna
+BEFORE UPDATE OF jmbg ON otpusnalista
+FOR EACH ROW
+EXECUTE FUNCTION func_deny_update_jmbg_otpusna();
+
+CREATE OR REPLACE PROCEDURE proc_create_otpusna_partition_for_current_year()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    y int := EXTRACT(YEAR FROM current_date)::int;
+    part_name text := format('otpusnalista_%s', y);
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_class c
+        JOIN pg_namespace n ON c.relnamespace = n.oid
+        WHERE c.relname = part_name
+          AND n.nspname = current_schema()
+    ) THEN
+        EXECUTE format(
+            'CREATE TABLE IF NOT EXISTS %I PARTITION OF %I
+             FOR VALUES FROM (TIMESTAMP %L) TO (TIMESTAMP %L);',
+            part_name,
+            'otpusnalista',
+            make_date(y,1,1)::text,
+            make_date(y+1,1,1)::text
+        );
+        RAISE NOTICE 'Particija za % kreirana', y;
+    ELSE
+        RAISE NOTICE 'Particija za % već postoji', y;
+    END IF;
+END;
+$$;

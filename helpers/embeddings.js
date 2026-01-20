@@ -18,7 +18,7 @@ export async function generateEmbedding(text) {
 
   if (!Array.isArray(floatArr) || floatArr.length !== TARGET_DIM)
     throw new Error(
-      `[/helpers/embeddings.js] Neslaganje dimenzija: očekivano ${TARGET_DIM}, dobijeno ${floatArr.length}`
+      `[helpers/embeddings.js] Neslaganje dimenzija: očekivano ${TARGET_DIM}, dobijeno ${floatArr.length}`,
     );
 
   return floatArr;

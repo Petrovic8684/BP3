@@ -1,0 +1,970 @@
+{
+	"info": {
+		"_postman_id": "82d49768-3236-48a1-91ec-6d6b7a59d318",
+		"name": "BP3",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "RegistrovaniPacijent",
+			"item": [
+				{
+					"name": "RegistrovaniPacijentCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jmbg\": \"0101993712347\",\n    \"prezimeime\": \"Jovana Lero\",\n    \"pol\": \"Z\",\n    \"imeroditelja\": \"Vesna\",\n    \"datumrodjenja\": \"1995-04-02T00:00:00.000Z\",\n    \"posao\": \"Programer\",\n    \"lbo\": \"LBO12346\",\n    \"brknjizice\": \"BK12346\",\n    \"adresa\": \"Beogradska 2\",\n    \"ppt\": \"11000\",\n    \"brlicencetehnicardodao\": \"LIC_T001\",\n    \"brlicenceizbranidoktor\": \"LIC_D001\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/registrovanipacijent",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"registrovanipacijent"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RegistrovaniPacijentRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/registrovanipacijent/0101993712345",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"registrovanipacijent",
+								"0101993712345"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RegistrovaniPacijentUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"prezimeime\": \"Jović Bojan\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/registrovanipacijent/0101993712345",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"registrovanipacijent",
+								"0101993712345"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RegistrovaniPacijentDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/registrovanipacijent/0101993712347",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"registrovanipacijent",
+								"0101993712347"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dijagnoza",
+			"item": [
+				{
+					"name": "DijagnozaCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sifradijagnoze\": \"A99\",\n    \"naziv\": \"Proba\",\n    \"opis\": \"Probna dijagnoza.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/dijagnoza",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dijagnoza"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DijagnozaRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/dijagnoza/A99",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dijagnoza",
+								"A99"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DijagnozaUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"naziv\": \"Test dijagnoza\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/dijagnoza/A99",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dijagnoza",
+								"A99"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DijagnozaDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/dijagnoza/A99",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dijagnoza",
+								"A99"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DijagnozaSearch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"query\": \"Zapaljenje disajnih puteva\",\n    \"limit\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/dijagnoza/search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"dijagnoza",
+								"search"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "VrstaOtpusta",
+			"item": [
+				{
+					"name": "VrstaOtpustaReadAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/vrstaotpusta",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vrstaotpusta"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "VrstaOtpustaUpdate",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"vrednosti\": [\"Otpust kući\", \"Proba\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/vrstaotpusta",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"vrstaotpusta"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "UputZaAmbulantnoSpecijalistickiPregled",
+			"item": [
+				{
+					"name": "UputZaAmbulantnoSpecijalistickiPregledCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sifrauputaas\": \"UPA003\",\n    \"razlog\": \"Proba\",\n    \"datum\": \"2026-01-05T00:00:00.000Z\",\n    \"brprotokola\": \"BP-A-003\",\n    \"jmbg\": \"0101993712345\",\n    \"brlicenceza\": \"LIC_S002\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/uputzaambulantnospecijalistickipregled",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uputzaambulantnospecijalistickipregled"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UputZaAmbulantnoSpecijalistickiPregledRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/uputzaambulantnospecijalistickipregled/UPA001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uputzaambulantnospecijalistickipregled",
+								"UPA001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UputZaAmbulantnoSpecijalistickiPregledUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"razlog\": \"Test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/uputzaambulantnospecijalistickipregled/UPA003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uputzaambulantnospecijalistickipregled",
+								"UPA003"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UputZaAmbulantnoSpecijalistickiPregledDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/uputzaambulantnospecijalistickipregled/UPA003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uputzaambulantnospecijalistickipregled",
+								"UPA003"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "IzvestajLekaraSpecijaliste",
+			"item": [
+				{
+					"name": "IzvestajLekaraSpecijalisteCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sifraizvestaja\": \"IZV003\",\n    \"datumvreme\": \"2026-01-05T10:30:00.000Z\",\n    \"brprotokola\": \"BP-A-001\",\n    \"nalazmisljenje\": \"Proba\",\n    \"sifrauputaas\": \"UPA001\",\n    \"sifradijagnoze\": \"I21\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/izvestajlekaraspecijaliste",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"izvestajlekaraspecijaliste"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IzvestajLekaraSpecijalisteRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/izvestajlekaraspecijaliste/IZV003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"izvestajlekaraspecijaliste",
+								"IZV003"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IzvestajLekaraSpecijalisteUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nalazmisljenje\": \"Test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/izvestajlekaraspecijaliste/IZV003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"izvestajlekaraspecijaliste",
+								"IZV003"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IzvestajLekaraSpecijalisteDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/izvestajlekaraspecijaliste/IZV001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"izvestajlekaraspecijaliste",
+								"IZV001"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "UputZaStacionarnoLecenje",
+			"item": [
+				{
+					"name": "UputZaStacionarnoLecenjeCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sifrauputasl\": \"UPL003\",\n    \"datum\": \"2026-01-05T00:00:00.000Z\",\n    \"brprotokola\": \"Proba\",\n    \"jmbg\": \"0101993712345\",\n    \"sifradijagnoze\": \"J30\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/uputzastacionarnolecenje",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uputzastacionarnolecenje"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UputZaStacionarnoLecenjeRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/uputzastacionarnolecenje/UPL001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uputzastacionarnolecenje",
+								"UPL001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UputZaStacionarnoLecenjeUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"brprotokola\": \"Test\",\n    \"sifradijagnoze\": \"J18\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/uputzastacionarnolecenje/UPL003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uputzastacionarnolecenje",
+								"UPL003"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UputZaStacionarnoLecenjeDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/uputzastacionarnolecenje/UPL003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uputzastacionarnolecenje",
+								"UPL003"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "NalogZaDavanjeInjekcija",
+			"item": [
+				{
+					"name": "NalogZaDavanjeInjekcijaCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sifranalogainj\": \"NAJ003\",\n    \"brprotokola\": \"BP-L-003\",\n    \"sifrauputasl\": \"UPL002\",\n    \"stavke\": [\n        {\n            \"brstavke\": 1,\n            \"jkl\": \"1103702\",\n            \"propisanoampula\": 2\n        },\n        {\n            \"brstavke\": 2,\n            \"jkl\": \"1401140\",\n            \"propisanoampula\": 3\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/nalogzadavanjeinjekcija",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"nalogzadavanjeinjekcija"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NalogZaDavanjeInjekcijaRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/nalogzadavanjeinjekcija/NAJ001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"nalogzadavanjeinjekcija",
+								"NAJ001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NalogZaDavanjeInjekcijaUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"datumvreme\": \"2026-01-020 10:00:00\",\n    \"brlicenceizvrsio\": \"LIC_T001\",\n    \"stavke\": [\n        {\n            \"brstavke\": 1,\n            \"jkl\": \"1401140\",\n            \"datoampula\": 2\n        },\n        {\n            \"brstavke\": 2,\n            \"datoampula\": 5\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/nalogzadavanjeinjekcija/NAJ003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"nalogzadavanjeinjekcija",
+								"NAJ003"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NalogZaDavanjeInjekcijaDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/nalogzadavanjeinjekcija/NAJ003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"nalogzadavanjeinjekcija",
+								"NAJ003"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "IstorijaBolesti",
+			"item": [
+				{
+					"name": "IstorijaBolestiCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"brojistorije\": \"HIS0003\",\n    \"tezinanovorodjence\": null,\n    \"datumprijema\": \"2026-01-05T00:00:00.000Z\",\n    \"sifrauputasl\": \"UPL001\",\n    \"sifrapovrede\": null,\n    \"sifradijagnozeuzrokhosp\": \"I21\",\n    \"sifraodeljenjaprijemno\": \"OD002\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/istorijabolesti",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"istorijabolesti"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IstorijaBolestiRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/istorijabolesti/HIS0001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"istorijabolesti",
+								"HIS0001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IstorijaBolestiUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tezinanovorodjence\": null,\n    \"datumprijema\": \"2026-01-05T00:00:00.000Z\",\n    \"datumotpusta\": \"2026-01-12T00:00:00.000Z\",\n    \"sifrauputasl\": \"UPL001\",\n    \"sifrapovrede\": null,\n    \"sifradijagnozeuzrokhosp\": \"I21\",\n    \"sifradijagnozeuzroksmrti\": null,\n    \"brlicencezatvorio\": \"LIC_S001\",\n    \"sifraodeljenjaprijemno\": \"OD002\",\n    \"vrstaotpusta\": \"Otpust kući\",\n    \"procedure\": [\n        \"4A023N6\",\n        \"0FB03ZX\"\n    ],\n    \"dijagnoze\": [],\n    \"stavke\": [\n        {\n            \"brstavkeistorije\": 1,\n            \"jkl\": \"4003300\",\n            \"datumvreme\": \"2026-01-05T12:00:00.000Z\",\n            \"toknalazi\": \"Stabilan bolesnik; bol u grudima smanjen nakon terapije.\",\n            \"doza\": \"160.00\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/istorijabolesti/HIS0003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"istorijabolesti",
+								"HIS0003"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IstorijaBolestiDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/istorijabolesti/HIS0003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"istorijabolesti",
+								"HIS0003"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OtpusnaLista",
+			"item": [
+				{
+					"name": "OtpusnaListaCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sifraotpustneliste\": \"OTP0003\",\n    \"predlog\": \"Proba\",\n    \"epikriza\": \"Pacijent hospitalizovan zbog akutnog infarkta miokarda (I21). Izvedena terapija, stabilan pri otpustu.\",\n    \"datumvreme\": \"2026-01-12T10:00:00.000Z\",\n    \"lecenod\": \"2026-01-05T00:00:00.000Z\",\n    \"lecendo\": \"2026-01-12T00:00:00.000Z\",\n    \"brojistorije\": \"HIS0001\",\n    \"sifradijagnozekonacna\": \"I21\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/otpusnalista",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"otpusnalista"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OtpusnaListaRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/otpusnalista/OTP0001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"otpusnalista",
+								"OTP0001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OtpusnaListaUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"predlog\": \"Test\",\n    \"brojistorije\": \"HIS0002\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/otpusnalista/OTP0003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"otpusnalista",
+								"OTP0003"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OtpusnaListaDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/otpusnalista/OTP0003",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"otpusnalista",
+								"OTP0003"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lek",
+			"item": [
+				{
+					"name": "LekCreate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lek\": {\n        \"jkl\": \"TEST\",\n        \"naziv\": \"PRILAZID\",\n        \"jacina\": 5,\n        \"jedinica\": \"mg\",\n        \"formaleka\": {\n            \"naziv\": \"Tableta\",\n            \"sifraformeleka\": \"FL001\"\n        },\n        \"proizvodjac\": {\n            \"naziv\": \"Galenika\",\n            \"sifraproizvodjaca\": \"PL003\"\n        },\n        \"aktivnesupstance\": [\n            {\n                \"atc\": \"C09AA04\",\n                \"leci\": [\n                    {\n                        \"opis\": \"Hronično povišen krvni pritisak bez poznatog uzroka.\",\n                        \"naziv\": \"Esencijalna hipertenzija\",\n                        \"sifradijagnoze\": \"I10\"\n                    }\n                ],\n                \"naziv\": \"Enalapril\",\n                \"tipsupstance\": {\n                    \"naziv\": \"Antihipertenziv\",\n                    \"sifratipasup\": \"TS006\"\n                }\n            },\n            {\n                \"atc\": \"C08CA01\",\n                \"leci\": [\n                    {\n                        \"opis\": \"Hronično povišen krvni pritisak bez poznatog uzroka.\",\n                        \"naziv\": \"Esencijalna hipertenzija\",\n                        \"sifradijagnoze\": \"I10\"\n                    }\n                ],\n                \"naziv\": \"Amlodipine\",\n                \"tipsupstance\": {\n                    \"naziv\": \"Antihipertenziv\",\n                    \"sifratipasup\": \"TS006\"\n                }\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/lek",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lek"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LekRead",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/lek/TEST",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lek",
+								"TEST"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LekUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"lek\": {\n        \"jkl\": \"TEST\",\n        \"naziv\": \"2222222\",\n        \"jacina\": 5,\n        \"jedinica\": \"mg\",\n        \"formaleka\": {\n            \"naziv\": \"Tableta\",\n            \"sifraformeleka\": \"FL001\"\n        },\n        \"proizvodjac\": {\n            \"naziv\": \"Galenika\",\n            \"sifraproizvodjaca\": \"PL003\"\n        },\n        \"aktivnesupstance\": [\n            {\n                \"atc\": \"C09AA04\",\n                \"leci\": [\n                    {\n                        \"opis\": \"Hronično povišen krvni pritisak bez poznatog uzroka.\",\n                        \"naziv\": \"Esencijalna hipertenzija\",\n                        \"sifradijagnoze\": \"I10\"\n                    }\n                ],\n                \"naziv\": \"Enalapril\",\n                \"tipsupstance\": {\n                    \"naziv\": \"Antihipertenziv\",\n                    \"sifratipasup\": \"TS006\"\n                }\n            },\n            {\n                \"atc\": \"C08CA01\",\n                \"leci\": [\n                    {\n                        \"opis\": \"Hronično povišen krvni pritisak bez poznatog uzroka.\",\n                        \"naziv\": \"Esencijalna hipertenzija\",\n                        \"sifradijagnoze\": \"I10\"\n                    }\n                ],\n                \"naziv\": \"Amlodipine\",\n                \"tipsupstance\": {\n                    \"naziv\": \"Antihipertenziv\",\n                    \"sifratipasup\": \"TS006\"\n                }\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/lek/TEST",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lek",
+								"TEST"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LekDelete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/lek/TEST",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"lek",
+								"TEST"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DobroDosli",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}",
+					"host": [
+						"{{base_url}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "localhost:3000"
+		}
+	]
+}
