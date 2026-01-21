@@ -3,7 +3,7 @@
 <table style="margin: 0 auto; text-align: left;">
   <tr>
     <td style="padding-right:50px;"><strong>Autor:</strong> Jovan Petrović</td>
-    <td style="text-align:right; padding-left:50px;"><strong>Mentor:</strong> dr Nenad Aničić</td>
+    <td style="text-align:right; padding-left:50px;"><strong>Mentor:</strong> prof. dr Nenad Aničić</td>
   </tr>
 </table>
 
@@ -39,23 +39,39 @@ git clone https://github.com/Petrovic8684/BP3.git
 cd BP3
 ```
 
-### 3️⃣ Kreiranje `.env` fajla
+### 3️⃣ Kreiranje `.env` fajlova
 
-Potrebno je napraviti `.env` fajl u root folderu projekta.
+Potrebno je napraviti `.env` fajl u root direktorijumu projekta.
 
-**Primer `.env` fajla:**
+**Primer `/.env` fajla:**
 
 ```env
-DB_USER=postgres
-DB_PASSWORD=postgres123
-DB_NAME=mydatabase
-DB_PORT=5432
-NODE_PORT=3000
 ADMINER_PORT=8080
-DATABASE_URL=postgres://postgres:postgres123@postgres:5432/mydatabase
+POSTGRES_PORT=5432
+NODE_PORT=3000
+VITE_REACT_PORT=5173
 ```
 
-⚠️ **Važno:** `DATABASE_URL` mora odgovarati Postgres servisu u `docker-compose.yml` (hostname `postgres`).
+Zatim je potrebno napraviti `.env` fajl u /backend direktorijumu projekta.
+
+**Primer `/backend/.env` fajla:**
+
+```env
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
+POSTGRES_DB=BP3
+POSTGRES_HOST=postgres
+
+TOKEN_SECRET="tajna"
+```
+
+Na kraju je potrebno napraviti `.env` fajl u /frontend direktorijumu projekta.
+
+**Primer `/frontend/.env` fajla:**
+
+```env
+VITE_API_URL="http://localhost:3000"
+```
 
 ---
 
@@ -67,12 +83,13 @@ U root direktorijumu projekta (gde se nalazi `docker-compose.yml`) potrebno je p
 docker compose up --build
 ```
 
-Opcija `--build` je potrebna da bi Docker izgradio Node sliku i instalirao sve zavisnosti. Ova komanda startuje sva tri servisa: **Node**, **Postgres** i **Adminer**.
+Opcija `--build` je potrebna da bi Docker izgradio slike i instalirao sve zavisnosti. Ova komanda startuje sva četiri servisa: **React**, **Node**, **Postgres** i **Adminer**.
 
 ### 5️⃣ Provera
 
-- Node aplikacija bi trebalo da bude dostupna na portu iz `.env` (npr. `localhost:3000`).
-- Adminer bi trebalo da bude dostupan na `localhost:8080` (ili `ADMINER_PORT` iz `.env`).
-- Postgres server radi u kontejneru i može da se konektuje iz Node aplikacije preko `DATABASE_URL`.
+- Node aplikacija bi trebalo da bude dostupna na portu iz `/.env` (npr. `localhost:3000`).
+- Adminer bi trebalo da bude dostupan na portu iz `/.env` (npr. `localhost:8080`).
+- Postgres server bi trebalo da bude dostupan na portu iz `/.env` (npr. `localhost:5432`).
+- React aplikacija bi trebalo da bude dostupna na portu iz `/.env` (npr. `localhost:5173`).
 
 _Happy coding! 🚀_
