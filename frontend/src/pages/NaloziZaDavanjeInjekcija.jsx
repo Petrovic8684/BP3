@@ -39,7 +39,9 @@ const NaloziZaDavanjeInjekcija = () => {
       try {
         setMetaLoading(true);
 
-        const lekRes = await api.get("/lek");
+        const lekRes = await api.get(
+          "/lek?forma=FL007&forma=FL008&forma=FL009",
+        );
 
         if (!mounted) return;
 
@@ -230,15 +232,13 @@ const NaloziZaDavanjeInjekcija = () => {
               onUpdate={update}
             />
 
-            {selectedItem.stavke && selectedItem.stavke.length > 0 && (
-              <StavkeNalogaZaDavanjeInjekcija
-                parentItem={selectedItem}
-                onSave={handleStavkeUpdate}
-                parentMode={formMode}
-                opts={lekOptions}
-                isDoktor={isDoktor}
-              />
-            )}
+            <StavkeNalogaZaDavanjeInjekcija
+              parentItem={selectedItem}
+              onSave={handleStavkeUpdate}
+              parentMode={formMode}
+              opts={lekOptions}
+              isDoktor={isDoktor}
+            />
           </div>
         )}
 

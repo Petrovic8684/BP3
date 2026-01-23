@@ -14,8 +14,17 @@ const lekModel = {
     return result.rows[0]?.data || null;
   },
 
-  readAll: async () => {
-    const result = await client.query(`SELECT data FROM ${VIEW}`);
+  readAll: async ({ forme } = {}) => {
+    let sql = `SELECT data FROM ${VIEW}`;
+    const params = [];
+
+    if (forme && forme.length > 0 && forme[0]) {
+      const placeholders = forme.map((_, i) => `$${i + 1}`).join(", ");
+      sql += ` WHERE data->'formaleka'->>'sifraformeleka' IN (${placeholders})`;
+      params.push(...forme);
+    }
+
+    const result = await client.query(sql, params);
     return result.rows.map((row) => row.data);
   },
 

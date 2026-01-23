@@ -27,7 +27,10 @@ export const lekCreate = async (req, res) => {
 
 export const lekReadAll = async (req, res) => {
   try {
-    const lekovi = await lekModel.readAll();
+    const { forma } = req.query;
+    const lekovi = await lekModel.readAll({
+      forme: Array.isArray(forma) ? forma : [forma],
+    });
 
     if (!lekovi || lekovi.length === 0) {
       return res.status(404).json({

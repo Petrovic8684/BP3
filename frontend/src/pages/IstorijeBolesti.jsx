@@ -332,32 +332,26 @@ const IstorijeBolesti = () => {
               onUpdate={update}
             />
 
-            {selectedItem.stavke && selectedItem.stavke.length >= 0 && (
-              <StavkeIstorije
-                parentItem={selectedItem}
-                onSave={handleStavkeUpdate}
-                parentMode={formMode}
-                opts={lekOptions}
-              />
-            )}
+            <StavkeIstorije
+              parentItem={selectedItem}
+              onSave={handleStavkeUpdate}
+              parentMode={formMode}
+              opts={lekOptions}
+            />
 
-            {selectedItem.stavke && selectedItem.stavke.length >= 0 && (
-              <DijagnozeIstorije
-                parentItem={selectedItem}
-                onSave={handleDijagnozeUpdate}
-                parentMode={formMode}
-                opts={dijagnozeOptions}
-              />
-            )}
+            <DijagnozeIstorije
+              parentItem={selectedItem}
+              onSave={handleDijagnozeUpdate}
+              parentMode={formMode}
+              opts={dijagnozeOptions}
+            />
 
-            {selectedItem.stavke && selectedItem.stavke.length >= 0 && (
-              <ProcedureIstorije
-                parentItem={selectedItem}
-                onSave={handleProcedureUpdate}
-                parentMode={formMode}
-                opts={procedureOptions}
-              />
-            )}
+            <ProcedureIstorije
+              parentItem={selectedItem}
+              onSave={handleProcedureUpdate}
+              parentMode={formMode}
+              opts={procedureOptions}
+            />
           </div>
         )}
 

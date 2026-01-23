@@ -16,7 +16,6 @@ const StavkeNalogaZaDavanjeInjekcija = ({
 
   useEffect(() => {
     setData(parentItem.stavke || []);
-    console.log(opts);
   }, [parentItem.stavke]);
 
   const idField = "brstavke";
@@ -36,7 +35,10 @@ const StavkeNalogaZaDavanjeInjekcija = ({
       data.length > 0
         ? Math.max(...data.map((s) => Number(s.brstavke))) + 1
         : 1;
-    const osvezenNiz = [...data, { ...novaStavka, brstavke: noviBr }];
+    const osvezenNiz = [
+      ...data,
+      { ...novaStavka, brstavke: noviBr, doza: null, datoampula: null },
+    ];
 
     const uspeh = await onSave(osvezenNiz);
     if (uspeh) setShowForm(false);
@@ -45,9 +47,21 @@ const StavkeNalogaZaDavanjeInjekcija = ({
   };
 
   const handleUpdate = async (id, izmenjenaStavka) => {
-    const osvezenNiz = data.map((s) =>
-      s.brstavke === id ? izmenjenaStavka : s,
-    );
+    const osvezenNiz = data.map((s) => {
+      if (s.brstavke === id) {
+        return {
+          ...izmenjenaStavka,
+          doza: null,
+          datoampula: isDoktor ? null : izmenjenaStavka.datoampula,
+        };
+      } else {
+        return {
+          ...s,
+          doza: null,
+          datoampula: isDoktor ? null : s.datoampula,
+        };
+      }
+    });
 
     const uspeh = await onSave(osvezenNiz);
     if (uspeh) setShowForm(false);
@@ -95,6 +109,7 @@ const StavkeNalogaZaDavanjeInjekcija = ({
                   jkl: null,
                   propisanoampula: null,
                   datoampula: null,
+                  doza: null,
                 });
                 setFormMode("create");
                 setShowForm(true);
