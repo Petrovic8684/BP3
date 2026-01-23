@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Logo from "../components/logo";
-import Odjava from "../components/odjava";
+import Header from "../components/header";
 import vratiKorisnika from "../lib/vratiKorisnika";
 import { useCRUD } from "../hooks/useCRUD";
 import GenericTable from "../components/genericTable";
@@ -79,12 +79,12 @@ const UputiZaAmbulantnoSpecijalistickiPregled = () => {
   }
 
   const defaultTemplate = {
-    sifrauputaas: "",
-    razlog: "",
-    datum: "",
-    brprotokola: "",
-    jmbg: "",
-    brlicenceza: "",
+    sifrauputaas: null,
+    razlog: null,
+    datum: null,
+    brprotokola: null,
+    jmbg: null,
+    brlicenceza: null,
   };
 
   const templateKeys =
@@ -96,6 +96,7 @@ const UputiZaAmbulantnoSpecijalistickiPregled = () => {
     jmbg: { type: "select", options: pacijentOptions },
     brlicenceza: { type: "select", options: specijalistaOptions },
     razlog: { type: "textarea" },
+    datum: { type: "date" },
   };
 
   const create = async (item) => {
@@ -139,7 +140,7 @@ const UputiZaAmbulantnoSpecijalistickiPregled = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Odjava korisnik={korisnik} />
+      <Header korisnik={korisnik} />
       <main className="flex flex-col items-center pt-12 px-6">
         <Logo className="mb-6" />
         <h1 className="text-2xl font-bold text-gray-700 mb-8 text-center">
@@ -156,6 +157,7 @@ const UputiZaAmbulantnoSpecijalistickiPregled = () => {
             onDelete={(id) => remove(id)}
             idField={idField}
             columns={tableColumns}
+            fieldConfig={fieldConfig}
           />
         )}
 

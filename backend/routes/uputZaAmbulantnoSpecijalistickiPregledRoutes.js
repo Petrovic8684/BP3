@@ -1,4 +1,6 @@
 import express from "express";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { Uloge, ulogeMiddleware } from "../middleware/ulogeMiddleware.js";
 import {
   uputZaAmbulantnoSpecijalistickiPregledCreate,
   uputZaAmbulantnoSpecijalistickiPregledReadAll,
@@ -9,10 +11,32 @@ import {
 
 const router = express.Router();
 
-router.route("/").post(uputZaAmbulantnoSpecijalistickiPregledCreate);
-router.route("/").get(uputZaAmbulantnoSpecijalistickiPregledReadAll);
-router.route("/:id").get(uputZaAmbulantnoSpecijalistickiPregledRead);
-router.route("/:id").patch(uputZaAmbulantnoSpecijalistickiPregledUpdate);
-router.route("/:id").delete(uputZaAmbulantnoSpecijalistickiPregledDelete);
+router.use(authMiddleware);
+
+router
+  .route("/")
+  .get(
+    ulogeMiddleware(Uloge.SPECIJALISTA, Uloge.DOKTOR),
+    uputZaAmbulantnoSpecijalistickiPregledReadAll,
+  )
+  .post(
+    ulogeMiddleware(Uloge.DOKTOR),
+    uputZaAmbulantnoSpecijalistickiPregledCreate,
+  );
+
+router
+  .route("/:id")
+  .get(
+    ulogeMiddleware(Uloge.DOKTOR),
+    uputZaAmbulantnoSpecijalistickiPregledRead,
+  )
+  .patch(
+    ulogeMiddleware(Uloge.DOKTOR),
+    uputZaAmbulantnoSpecijalistickiPregledUpdate,
+  )
+  .delete(
+    ulogeMiddleware(Uloge.DOKTOR),
+    uputZaAmbulantnoSpecijalistickiPregledDelete,
+  );
 
 export default router;

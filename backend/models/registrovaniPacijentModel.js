@@ -72,17 +72,31 @@ const registrovaniPacijentModel = {
     return result.rows[0] || null;
   },
 
-  readAll: async () => {
-    const result = await client.query(
-      `SELECT m.jmbg, m.prezimeime,
-           d.pol, d.imeroditelja, d.datumrodjenja, d.posao,
-           d.lbo, d.brknjizice, d.adresa, d.ppt,
-           d.brlicencetehnicardodao, d.brlicenceizbranidoktor
-       FROM ${MASTER_TABLE} m
-       LEFT JOIN ${DETAILS_TABLE} d USING (jmbg)`,
-    );
+  readAll: async (search, brlicence) => {
+    let query = `
+      SELECT m.jmbg, m.prezimeime,
+            d.pol, d.imeroditelja, d.datumrodjenja, d.posao,
+            d.lbo, d.brknjizice, d.adresa, d.ppt,
+            d.brlicencetehnicardodao, d.brlicenceizbranidoktor
+      FROM primalacusluge m
+      LEFT JOIN vw_registrovanipacijent_full d USING (jmbg)
+      WHERE 1=1
+    `;
 
-    return result.rows || null;
+    const params = [];
+
+    if (search) {
+      params.push(`${search.toLowerCase()}%`);
+      query += ` AND LOWER(m.prezimeime) LIKE $${params.length}`;
+    }
+
+    if (brlicence) {
+      params.push(brlicence);
+      query += ` AND d.brlicenceizbranidoktor = $${params.length}`;
+    }
+
+    const result = await client.query(query, params);
+    return result.rows;
   },
 
   update: async (jmbg, data) => {

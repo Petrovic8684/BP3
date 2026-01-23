@@ -1,4 +1,5 @@
 import registrovaniPacijentModel from "../models/registrovaniPacijentModel.js";
+import { Uloge } from "../middleware/ulogeMiddleware.js";
 
 export const registrovaniPacijentCreate = async (req, res) => {
   try {
@@ -27,23 +28,28 @@ export const registrovaniPacijentCreate = async (req, res) => {
 
 export const registrovaniPacijentReadAll = async (req, res) => {
   try {
-    const pacijenti = await registrovaniPacijentModel.readAll();
+    const { search } = req.query;
 
-    if (!pacijenti || pacijenti.length === 0) {
-      return res.status(404).json({
-        message: "Ne postoji nijedan pacijent!",
-        success: false,
-      });
+    const uloga = req.pruzalac.brlicence.charAt(4);
+
+    let brlicenceFilter = null;
+    if (uloga === Uloge.DOKTOR) {
+      brlicenceFilter = req.pruzalac.brlicence;
     }
 
+    const pacijenti = await registrovaniPacijentModel.readAll(
+      search,
+      brlicenceFilter,
+    );
+
     res.status(200).json({
-      message: "Uspelo čitanje pacijenta!",
+      message: "Uspelo čitanje pacijenata!",
       success: true,
       data: pacijenti,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Neuspelo čitanje pacijenta!",
+      message: "Neuspelo čitanje pacijenata!",
       success: false,
       error: error.message,
     });

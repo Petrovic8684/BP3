@@ -17,6 +17,10 @@ import mestoRoutes from "./routes/mestoRoutes.js";
 import doktorMedicineRoutes from "./routes/doktorMedicineRoutes.js";
 import specijalistaRoutes from "./routes/specijalistaRoutes.js";
 import pruzalacUslugeRotues from "./routes/pruzalacUslugeRoutes.js";
+import medicinskiTehnicarRoutes from "./routes/medicinskiTehnicarRoutes.js";
+import odeljenjeRoutes from "./routes/odeljenjeRoutes.js";
+import uzrokPovredeRoutes from "./routes/uzrokPovredeRoutes.js";
+import proceduraRoutes from "./routes/proceduraRoutes.js";
 
 const app = express();
 app.use(cors());
@@ -48,6 +52,10 @@ app.use("/mesto", mestoRoutes);
 app.use("/doktormedicine", doktorMedicineRoutes);
 app.use("/specijalista", specijalistaRoutes);
 app.use("/pruzalacusluge", pruzalacUslugeRotues);
+app.use("/medicinskitehnicar", medicinskiTehnicarRoutes);
+app.use("/odeljenje", odeljenjeRoutes);
+app.use("/uzrokpovrede", uzrokPovredeRoutes);
+app.use("/procedura", proceduraRoutes);
 
 const port = process.env.NODE_PORT || 3000;
 app.listen(port, () => {

@@ -24,10 +24,10 @@ export const useCRUD = (endpoint) => {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = async (query = "") => {
     try {
       setLoading(true);
-      const res = await api.get(endpoint);
+      const res = await api.get(`${endpoint}${query}`);
       if (res.data?.success) {
         setData(res.data.data);
         setGreska(null);

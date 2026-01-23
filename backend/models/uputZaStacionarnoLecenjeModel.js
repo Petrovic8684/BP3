@@ -24,13 +24,25 @@ const uputZaStacionarnoLecenjeModel = {
     }
   },
 
-  readAll: async () => {
-    const result = await client.query(
-      `SELECT sifrauputasl, datum, brprotokola, jmbg, sifradijagnoze, naziv
-       FROM ${TABLE}`,
-    );
+  readAll: async (brlicence) => {
+    let query = `
+      SELECT u.sifrauputasl, u.datum, u.brprotokola, u.jmbg, u.sifradijagnoze
+      FROM ${TABLE} u
+      JOIN  registrovanipacijent r ON r.jmbg = u.jmbg
+      WHERE 1=1
+    `;
 
-    return result.rows || null;
+    const params = [];
+
+    if (brlicence) {
+      params.push(brlicence);
+      query += ` AND r.brlicenceizbranidoktor = $${params.length}`;
+    }
+
+    query += ` ORDER BY u.datum DESC, u.sifrauputasl`;
+
+    const result = await client.query(query, params);
+    return result.rows;
   },
 
   read: async (sifrauputasl) => {

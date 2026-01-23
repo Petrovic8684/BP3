@@ -1,4 +1,6 @@
 import express from "express";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { Uloge, ulogeMiddleware } from "../middleware/ulogeMiddleware.js";
 import {
   izvestajLekaraSpecijalisteCreate,
   izvestajLekaraSpecijalisteReadAll,
@@ -9,10 +11,20 @@ import {
 
 const router = express.Router();
 
-router.route("/").post(izvestajLekaraSpecijalisteCreate);
-router.route("/").get(izvestajLekaraSpecijalisteReadAll);
-router.route("/:id").get(izvestajLekaraSpecijalisteRead);
-router.route("/:id").patch(izvestajLekaraSpecijalisteUpdate);
-router.route("/:id").delete(izvestajLekaraSpecijalisteDelete);
+router.use(authMiddleware);
+
+router
+  .route("/")
+  .get(ulogeMiddleware(Uloge.SPECIJALISTA), izvestajLekaraSpecijalisteReadAll)
+  .post(ulogeMiddleware(Uloge.SPECIJALISTA), izvestajLekaraSpecijalisteCreate);
+
+router
+  .route("/:id")
+  .get(ulogeMiddleware(Uloge.SPECIJALISTA), izvestajLekaraSpecijalisteRead)
+  .patch(ulogeMiddleware(Uloge.SPECIJALISTA), izvestajLekaraSpecijalisteUpdate)
+  .delete(
+    ulogeMiddleware(Uloge.SPECIJALISTA),
+    izvestajLekaraSpecijalisteDelete,
+  );
 
 export default router;

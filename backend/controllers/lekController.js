@@ -25,6 +25,31 @@ export const lekCreate = async (req, res) => {
   }
 };
 
+export const lekReadAll = async (req, res) => {
+  try {
+    const lekovi = await lekModel.readAll();
+
+    if (!lekovi || lekovi.length === 0) {
+      return res.status(404).json({
+        message: "Ne postoji nijedan lek!",
+        success: false,
+      });
+    }
+
+    res.status(200).json({
+      message: "Uspelo čitanje lekova!",
+      success: true,
+      data: lekovi,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Greška pri čitanju lekova!",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
 export const lekRead = async (req, res) => {
   try {
     const { id } = req.params;

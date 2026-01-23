@@ -14,14 +14,16 @@ const lekModel = {
     return result.rows[0]?.data || null;
   },
 
+  readAll: async () => {
+    const result = await client.query(`SELECT data FROM ${VIEW}`);
+    return result.rows.map((row) => row.data);
+  },
+
   read: async (jkl) => {
     const result = await client.query(
-      `SELECT data
-       FROM ${VIEW}
-       WHERE (data->'lek'->>'jkl') = $1`,
+      `SELECT data FROM ${VIEW} WHERE (data->>'jkl') = $1`,
       [jkl],
     );
-
     return result.rows[0]?.data || null;
   },
 
@@ -29,22 +31,20 @@ const lekModel = {
     const result = await client.query(
       `UPDATE ${VIEW}
        SET data = $2
-       WHERE (data->'lek'->>'jkl') = $1
+       WHERE (data->>'jkl') = $1
        RETURNING data`,
       [jkl, data],
     );
-
     return result.rows[0]?.data || null;
   },
 
   delete: async (jkl) => {
     const result = await client.query(
       `DELETE FROM ${VIEW}
-       WHERE (data->'lek'->>'jkl') = $1
+       WHERE (data->>'jkl') = $1
        RETURNING data`,
       [jkl],
     );
-
     return result.rows[0]?.data || null;
   },
 };

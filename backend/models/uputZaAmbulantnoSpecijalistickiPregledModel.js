@@ -1,4 +1,5 @@
 import { client } from "../db/db.js";
+import { Uloge } from "../middleware/ulogeMiddleware.js";
 
 const TABLE = "uputzaambulantnospecijalistickipregled";
 
@@ -27,12 +28,32 @@ const uputZaAmbulantnoSpecijalistickiPregledModel = {
     }
   },
 
-  readAll: async () => {
-    const result = await client.query(
-      `SELECT sifrauputaas, razlog, datum, brprotokola, jmbg, brlicenceza
-       FROM ${TABLE}`,
-    );
+  readAll: async (brlicence, uloga) => {
+    let query = `
+    SELECT u.sifrauputaas,
+           u.razlog,
+           u.datum,
+           u.brprotokola,
+           u.jmbg,
+           u.brlicenceza
+    FROM ${TABLE} u
+    JOIN registrovanipacijent r ON r.jmbg = u.jmbg
+    WHERE 1=1
+  `;
 
+    const params = [];
+
+    if (uloga === Uloge.DOKTOR && brlicence) {
+      params.push(brlicence);
+      query += ` AND r.brlicenceizbranidoktor = $${params.length}`;
+    } else if (uloga === Uloge.SPECIJALISTA && brlicence) {
+      params.push(brlicence);
+      query += ` AND u.brlicenceza = $${params.length}`;
+    }
+
+    query += ` ORDER BY u.datum DESC, u.sifrauputaas`;
+
+    const result = await client.query(query, params);
     return result.rows || null;
   },
 

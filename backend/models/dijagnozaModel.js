@@ -98,38 +98,34 @@ const dijagnozaModel = {
       const qEmb = await generateEmbedding(query);
       const vectorLiteral = "[" + qEmb.join(",") + "]";
 
-      const dijagnoze = await client.query(
-        `SELECT sifradijagnoze, naziv, opis, 1 - (embedding <=> $1::vector) AS slicnost
-         FROM dijagnoza
-         WHERE embedding IS NOT NULL
+      const result = await client.query(
+        `SELECT 
+             d.sifradijagnoze, 
+             d.naziv, 
+             d.opis, 
+             1 - (d.embedding <=> $1::vector) AS slicnost,
+             (
+               SELECT COALESCE(json_agg(lekovi_sub), '[]')
+               FROM (
+                 SELECT l.jkl, l.naziv, l.jacina, l.jedinica
+                 FROM lek l
+                 WHERE l.jkl IN (
+                   SELECT lsa.jkl
+                   FROM leksadrziaktivnasupstanca lsa
+                   JOIN leci lec ON lsa.atc = lec.atc
+                   WHERE lec.sifradijagnoze = d.sifradijagnoze
+                 )
+                 LIMIT 3
+               ) lekovi_sub
+             ) AS lekovi
+         FROM dijagnoza d
+         WHERE d.embedding IS NOT NULL
          ORDER BY slicnost DESC
          LIMIT $2`,
         [vectorLiteral, limit],
       );
 
-      const dijagnozeSaLekovima = await Promise.all(
-        dijagnoze.rows.map(async (dijagnoza) => {
-          const lekoviRes = await client.query(
-            `SELECT l.jkl, l.naziv, l.jacina, l.jedinica
-	         FROM lek l
-	         WHERE l.jkl IN (
-    	         SELECT lsa.jkl
-    		     FROM leksadrziaktivnasupstanca lsa
-    		     JOIN leci lec ON lsa.atc = lec.atc
-    		     WHERE lec.sifradijagnoze = $1
-	         )
-	         LIMIT 3;`,
-            [dijagnoza.sifradijagnoze],
-          );
-
-          return {
-            ...dijagnoza,
-            lekovi: lekoviRes.rows,
-          };
-        }),
-      );
-
-      return dijagnozeSaLekovima;
+      return result.rows;
     } catch (err) {
       throw err;
     }

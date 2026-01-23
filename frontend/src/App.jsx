@@ -8,6 +8,8 @@ import UputiZaStacionarnoLecenje from "./pages/UputiZaStacionarnoLecenje";
 import IzvestajiLekaraSpecijaliste from "./pages/IzvestajiLekaraSpecijaliste";
 import IstorijeBolesti from "./pages/IstorijeBolesti";
 import OtpusneListe from "./pages/OtpusneListe";
+import VrsteOtpusta from "./pages/VrsteOtpusta";
+import PreporukaLekova from "./pages/PreporukaLekova";
 import Nepoznato from "./pages/Nepoznato";
 
 function App() {
@@ -34,6 +36,8 @@ function App() {
       />
       <Route path="/istorijabolesti" element={<IstorijeBolesti />} />
       <Route path="/otpusnalista" element={<OtpusneListe />} />
+      <Route path="/vrsteotpusta" element={<VrsteOtpusta />} />
+      <Route path="/preporukalekova" element={<PreporukaLekova />} />
       <Route path="*" element={<Nepoznato />} />
     </Routes>
   );

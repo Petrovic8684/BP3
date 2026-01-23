@@ -42,13 +42,33 @@ const otpusnaListaModel = {
     }
   },
 
-  readAll: async () => {
-    const result = await client.query(
-      `SELECT sifraotpustneliste, predlog, epikriza, datumvreme, lecenod, lecendo, brojistorije, sifradijagnozekonacna, jmbg
-       FROM ${TABLE}`,
-    );
+  readAll: async (brlicenceFilter) => {
+    const params = [];
+    let query = `
+    SELECT o.sifraotpustneliste,
+           o.predlog,
+           o.epikriza,
+           o.datumvreme,
+           o.lecenod,
+           o.lecendo,
+           o.brojistorije,
+           o.sifradijagnozekonacna,
+           o.jmbg
+    FROM ${TABLE} o
+    JOIN istorijabolesti i
+      ON i.brojistorije = o.brojistorije
+    WHERE 1=1
+  `;
 
-    return result.rows || null;
+    if (brlicenceFilter) {
+      params.push(brlicenceFilter);
+      query += ` AND i.brlicencezatvorio = $${params.length}`;
+    }
+
+    query += ` ORDER BY o.datumvreme DESC, o.sifraotpustneliste`;
+
+    const res = await client.query(query, params);
+    return res.rows || null;
   },
 
   read: async (sifraotpustneliste) => {

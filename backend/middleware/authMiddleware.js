@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
 import pruzalacUslugeModel from "../models/pruzalacUslugeModel.js";
 
-const authMiddleware = async (req, res, next) => {
+export const authMiddleware = async (req, res, next) => {
   const token = req.headers["authorization"]?.split(" ")[1];
-
   if (!token)
     return res
       .status(401)
@@ -11,7 +10,7 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const dekodirano = jwt.verify(token, process.env.TOKEN_SECRET);
-    const pruzalac = await pruzalacUslugeModel.find(dekodirano.brlicence);
+    const pruzalac = await pruzalacUslugeModel.read(dekodirano.brlicence);
 
     if (!pruzalac)
       return res
@@ -22,11 +21,9 @@ const authMiddleware = async (req, res, next) => {
     next();
   } catch (error) {
     res.status(401).json({
-      message: "Nevalidan ili zakasneli token!",
+      message: "Neuspela provera prava!",
       success: false,
       error: error.message,
     });
   }
 };
-
-export default authMiddleware;

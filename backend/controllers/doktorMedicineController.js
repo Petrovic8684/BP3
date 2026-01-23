@@ -18,7 +18,7 @@ export const doktorMedicineReadAll = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Neuspelo čitanje doktoramedicine!",
+      message: "Neuspelo čitanje doktora medicine!",
       success: false,
       error: error.message,
     });

@@ -27,7 +27,14 @@ export const istorijaBolestiCreate = async (req, res) => {
 
 export const istorijaBolestiReadAll = async (req, res) => {
   try {
-    const istorije = await istorijaBolestiModel.readAll();
+    const brlicenceFilter = req.pruzalac.brlicence;
+    console.log(req.query.samoZatvorene);
+    const samoZatvorene = req.query.samoZatvorene === "true";
+
+    const istorije = await istorijaBolestiModel.readAll(
+      brlicenceFilter,
+      samoZatvorene,
+    );
 
     if (!istorije || istorije.length === 0) {
       return res.status(404).json({

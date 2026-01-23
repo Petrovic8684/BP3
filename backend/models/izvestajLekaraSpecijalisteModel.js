@@ -38,13 +38,40 @@ const izvestajLekaraSpecijalisteModel = {
     }
   },
 
-  readAll: async () => {
-    const result = await client.query(
-      `SELECT sifraizvestaja, datumvreme, brprotokola, nalazmisljenje, sifrauputaas, sifradijagnoze
-       FROM ${TABLE}`,
-    );
+  readAll: async (brlicence) => {
+    const params = [];
 
-    return result.rows || null;
+    let query;
+    if (brlicence) {
+      params.push(brlicence);
+      query = `
+      SELECT i.sifraizvestaja,
+             i.datumvreme,
+             i.brprotokola,
+             i.nalazmisljenje,
+             i.sifrauputaas,
+             i.sifradijagnoze
+      FROM ${TABLE} i
+      JOIN uputzaambulantnospecijalistickipregled u
+        ON u.sifrauputaas = i.sifrauputaas
+      WHERE u.brlicenceza = $1
+      ORDER BY i.datumvreme DESC, i.sifraizvestaja
+    `;
+    } else {
+      query = `
+      SELECT i.sifraizvestaja,
+             i.datumvreme,
+             i.brprotokola,
+             i.nalazmisljenje,
+             i.sifrauputaas,
+             i.sifradijagnoze
+      FROM ${TABLE} i
+      ORDER BY i.datumvreme DESC, i.sifraizvestaja
+    `;
+    }
+
+    const result = await client.query(query, params);
+    return result.rows || [];
   },
 
   read: async (sifraizvestaja) => {

@@ -1,4 +1,5 @@
 import izvestajLekaraSpecijalisteModel from "../models/izvestajLekaraSpecijalisteModel.js";
+import { Uloge } from "../middleware/ulogeMiddleware.js";
 
 export const izvestajLekaraSpecijalisteCreate = async (req, res) => {
   try {
@@ -27,7 +28,14 @@ export const izvestajLekaraSpecijalisteCreate = async (req, res) => {
 
 export const izvestajLekaraSpecijalisteReadAll = async (req, res) => {
   try {
-    const izvestaji = await izvestajLekaraSpecijalisteModel.readAll();
+    const uloga = req.pruzalac.brlicence.charAt(4);
+
+    let brlicenceFilter = null;
+    if (uloga === Uloge.SPECIJALISTA) {
+      brlicenceFilter = req.pruzalac.brlicence;
+    }
+    const izvestaji =
+      await izvestajLekaraSpecijalisteModel.readAll(brlicenceFilter);
 
     if (!izvestaji || izvestaji.length === 0) {
       return res.status(404).json({

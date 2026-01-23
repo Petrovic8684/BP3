@@ -25,6 +25,34 @@ export const nalogZaDavanjeInjekcijaCreate = async (req, res) => {
   }
 };
 
+export const nalogZaDavanjeInjekcijaReadAll = async (req, res) => {
+  try {
+    const brlicence = req.pruzalac.brlicence;
+    const uloga = req.pruzalac.brlicence.charAt(4);
+
+    const nalozi = await nalogZaDavanjeInjekcijaModel.readAll(brlicence, uloga);
+
+    if (!nalozi || nalozi.length === 0) {
+      return res.status(404).json({
+        message: "Ne postoji nijedan nalog!",
+        success: false,
+      });
+    }
+
+    res.status(200).json({
+      message: "Uspelo čitanje naloga!",
+      success: true,
+      data: nalozi,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Neuspelo čitanje naloga!",
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
 export const nalogZaDavanjeInjekcijaRead = async (req, res) => {
   try {
     const { id } = req.params;

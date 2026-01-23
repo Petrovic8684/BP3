@@ -1,4 +1,5 @@
 import uputZaAmbulantnoSpecijalistickiPregledModel from "../models/uputZaAmbulantnoSpecijalistickiPregledModel.js";
+import { Uloge } from "../middleware/ulogeMiddleware.js";
 
 export const uputZaAmbulantnoSpecijalistickiPregledCreate = async (
   req,
@@ -35,7 +36,17 @@ export const uputZaAmbulantnoSpecijalistickiPregledReadAll = async (
   res,
 ) => {
   try {
-    const uputi = await uputZaAmbulantnoSpecijalistickiPregledModel.readAll();
+    const uloga = req.pruzalac.brlicence.charAt(4);
+
+    let brlicenceFilter = null;
+    if (uloga === Uloge.DOKTOR || uloga === Uloge.SPECIJALISTA) {
+      brlicenceFilter = req.pruzalac.brlicence;
+    }
+
+    const uputi = await uputZaAmbulantnoSpecijalistickiPregledModel.readAll(
+      brlicenceFilter,
+      uloga,
+    );
 
     if (!uputi || uputi.length === 0) {
       return res.status(404).json({

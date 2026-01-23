@@ -7,6 +7,8 @@ import izvestajLekaraSpecijalisteSlike from "../assets/slike/izvestajlekaraspeci
 import otpusnaListaSlika from "../assets/slike/otpusnalista.svg";
 import uputZaAmbulantnoSpecijalistickiPregledSlika from "../assets/slike/uputzaambulantnospecijalistickipregled.svg";
 import uputZaStacionarnoLecenjeSlika from "../assets/slike/uputzastacionarnolecenje.svg";
+import vrstaOtpustaSlika from "../assets/slike/vrstaOtpustaSlika.svg";
+import preporukaLekovaSlika from "../assets/slike/preporukaLekovaSlika.svg";
 
 export const Kartica = ({ naslov, slika, ruta }) => {
   const navigate = useNavigate();
@@ -68,6 +70,16 @@ export const karticePoUlozi = {
       naslov: "Otpusne liste",
       slika: otpusnaListaSlika,
       ruta: "/otpusnalista",
+    },
+    {
+      naslov: "Vrste otpusta",
+      slika: vrstaOtpustaSlika,
+      ruta: "/vrsteotpusta",
+    },
+    {
+      naslov: "Preporuka lekova",
+      slika: preporukaLekovaSlika,
+      ruta: "/preporukalekova",
     },
   ],
 };

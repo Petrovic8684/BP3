@@ -50,32 +50,3 @@ export const pruzalacUslugeLogin = async (req, res) => {
     });
   }
 };
-
-export const pruzalacUslugeRead = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const pruzalac = await pruzalacUslugeModel.read(id);
-
-    if (!pruzalac) {
-      return res.status(404).json({
-        message: "Pružalac usluge ne postoji!",
-        success: false,
-      });
-    }
-
-    const { lozinka, ...safeData } = pruzalac;
-
-    res.status(200).json({
-      message: "Uspelo čitanje pružaoca usluge!",
-      success: true,
-      data: safeData,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Neuspelo čitanje pružaoca usluge!",
-      success: false,
-      error: error.message,
-    });
-  }
-};

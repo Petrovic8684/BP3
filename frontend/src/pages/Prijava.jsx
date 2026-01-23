@@ -6,8 +6,8 @@ import Logo from "../components/logo";
 import vratiKorisnika from "../lib/vratiKorisnika";
 
 const Prijava = () => {
-  const [brLicence, setBrLicence] = useState("");
-  const [lozinka, setLozinka] = useState("");
+  const [brLicence, setBrLicence] = useState(null);
+  const [lozinka, setLozinka] = useState(null);
   const [greska, setGreska] = useState(null);
 
   const navigate = useNavigate();
@@ -92,7 +92,7 @@ const Prijava = () => {
             type="submit"
             className="w-full p-3 bg-teal-600 text-white font-semibold rounded-md hover:bg-teal-700"
           >
-            Prijavi se
+            Prijavite se
           </button>
 
           {greska && (

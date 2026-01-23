@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Logo from "../components/logo";
-import Odjava from "../components/odjava";
+import Header from "../components/header";
 import vratiKorisnika from "../lib/vratiKorisnika";
 import { useCRUD } from "../hooks/useCRUD";
 import GenericTable from "../components/genericTable";
@@ -30,7 +30,7 @@ const OtpusneListe = () => {
         setMetaLoading(true);
 
         const [istorijaRes, dijagnozaRes] = await Promise.all([
-          api.get("/istorijabolesti"),
+          api.get("/istorijabolesti?samoZatvorene=true"),
           api.get("/dijagnoza"),
         ]);
 
@@ -91,6 +91,9 @@ const OtpusneListe = () => {
     brojistorije: { type: "select", options: brojistorijeOptions },
     sifradijagnozekonacna: { type: "select", options: sifradijagnozeOptions },
     jmbg: { readOnly: true },
+    datumvreme: { type: "datetime" },
+    lecenod: { type: "date" },
+    lecendo: { type: "date" },
   };
 
   const handleEdit = (row) => {
@@ -123,7 +126,7 @@ const OtpusneListe = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Odjava korisnik={korisnik} />
+      <Header korisnik={korisnik} />
       <main className="flex flex-col items-center pt-12 px-6">
         <Logo className="mb-6" />
         <h1 className="text-2xl font-bold text-gray-700 mb-8 text-center">
@@ -140,6 +143,7 @@ const OtpusneListe = () => {
             onDelete={remove}
             idField={idField}
             columns={tableColumns}
+            fieldConfig={fieldConfig}
           />
         )}
 

@@ -1,4 +1,6 @@
 import express from "express";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { Uloge, ulogeMiddleware } from "../middleware/ulogeMiddleware.js";
 import {
   otpusnaListaCreate,
   otpusnaListaReadAll,
@@ -9,10 +11,17 @@ import {
 
 const router = express.Router();
 
-router.route("/").post(otpusnaListaCreate);
-router.route("/").get(otpusnaListaReadAll);
-router.route("/:id").get(otpusnaListaRead);
-router.route("/:id").patch(otpusnaListaUpdate);
-router.route("/:id").delete(otpusnaListaDelete);
+router.use(authMiddleware);
+
+router
+  .route("/")
+  .get(ulogeMiddleware(Uloge.SPECIJALISTA), otpusnaListaReadAll)
+  .post(ulogeMiddleware(Uloge.SPECIJALISTA), otpusnaListaCreate);
+
+router
+  .route("/:id")
+  .get(ulogeMiddleware(Uloge.SPECIJALISTA), otpusnaListaRead)
+  .patch(ulogeMiddleware(Uloge.SPECIJALISTA), otpusnaListaUpdate)
+  .delete(ulogeMiddleware(Uloge.SPECIJALISTA), otpusnaListaDelete);
 
 export default router;

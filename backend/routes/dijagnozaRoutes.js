@@ -1,4 +1,6 @@
 import express from "express";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { Uloge, ulogeMiddleware } from "../middleware/ulogeMiddleware.js";
 import {
   dijagnozaCreate,
   dijagnozaReadAll,
@@ -10,12 +12,21 @@ import {
 
 const router = express.Router();
 
-router.route("/").post(dijagnozaCreate);
-router.route("/").get(dijagnozaReadAll);
-router.route("/:id").get(dijagnozaRead);
-router.route("/:id").patch(dijagnozaUpdate);
-router.route("/:id").delete(dijagnozaDelete);
+router.use(authMiddleware);
 
-router.route("/search").post(dijagnozaSearch);
+router
+  .route("/search")
+  .post(ulogeMiddleware(Uloge.DOKTOR, Uloge.SPECIJALISTA), dijagnozaSearch);
+
+router
+  .route("/")
+  .get(ulogeMiddleware(Uloge.DOKTOR, Uloge.SPECIJALISTA), dijagnozaReadAll)
+  .post(ulogeMiddleware(Uloge.SPECIJALISTA), dijagnozaCreate);
+
+router
+  .route("/:id")
+  .get(ulogeMiddleware(Uloge.DOKTOR, Uloge.SPECIJALISTA), dijagnozaRead)
+  .patch(ulogeMiddleware(Uloge.SPECIJALISTA), dijagnozaUpdate)
+  .delete(ulogeMiddleware(Uloge.SPECIJALISTA), dijagnozaDelete);
 
 export default router;

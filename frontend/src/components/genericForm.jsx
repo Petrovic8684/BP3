@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { parseISO, isValid } from "date-fns";
 
 const GenericForm = ({
   item,
@@ -16,37 +15,53 @@ const GenericForm = ({
   const viewOnly = mode === "view";
 
   useEffect(() => {
-    const parseValue = (val) => {
-      if (!val) return "";
-      const d = new Date(val);
-      return isNaN(d.getTime()) ? val : d.toISOString().slice(0, 16);
+    const normalizeValue = (key, val) => {
+      if (val == null) return "";
+
+      const cfg = fieldConfig[key];
+
+      if (cfg?.type === "datetime") {
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 16);
+      }
+
+      if (cfg?.type === "date") {
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+      }
+
+      return val;
     };
 
     if (item) {
       const newItem = { ...item };
       Object.keys(newItem).forEach((k) => {
-        newItem[k] = parseValue(newItem[k]);
+        newItem[k] = normalizeValue(k, newItem[k]);
       });
+
       Object.keys(fieldConfig).forEach((fk) => {
         if (fieldConfig[fk].type === "hidden" && newItem[fk] === undefined) {
           newItem[fk] = "";
         }
       });
+
       setFormData(newItem);
     } else if (template) {
       const keys = Array.isArray(template) ? template : Object.keys(template);
       const empty = {};
       keys.forEach((k) => (empty[k] = ""));
+
       Object.keys(fieldConfig).forEach((fk) => {
         if (fieldConfig[fk].type === "hidden" && empty[fk] === undefined) {
           empty[fk] = "";
         }
       });
+
       setFormData(empty);
     } else {
       setFormData({});
     }
-  }, [item, template, JSON.stringify(fieldConfig)]);
+  }, [item, template, fieldConfig]);
 
   const handleChange = (key, value) => {
     setFormData((s) => ({ ...s, [key]: value }));
@@ -60,24 +75,24 @@ const GenericForm = ({
       } else if (mode === "create") {
         res = await onCreate(formData);
       }
-      if (res && res.success) {
+
+      if (res && res.success === true) {
         onClose();
       } else {
-        console.warn("Akcija nije uspela, ostajem u formi da prikažem grešku.");
+        console.warn("Akcija nije uspela.");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Greška u handleSubmit-u:", err);
     }
   };
-
   const keys =
     template && Array.isArray(template)
       ? template
       : Object.keys(formData || {});
 
-  if (!keys || keys.length === 0) {
+  if (!keys.length) {
     return (
-      <div className="mt-6 w-full max-w-3xl p-6 bg-white rounded-lg shadow-md">
+      <div className="mt-6 w-full max-w-4xl p-6 bg-white rounded-lg shadow-md">
         <div className="text-center text-gray-600">
           Nema polja za prikaz. Prosledi "template".
         </div>
@@ -94,20 +109,40 @@ const GenericForm = ({
   }
 
   return (
-    <div className="mt-6 mb-16 w-full max-w-3xl p-6 bg-white rounded-lg shadow-md">
+    <div className="mt-6 mb-16 w-full max-w-4xl p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-lg font-semibold mb-4">
-        {mode === "view" ? "Detalji" : izmena ? "Izmeni stavku" : "Nova stavka"}
+        {mode === "view" ? "Detalji reda" : izmena ? "Izmeni red" : "Novi red"}
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {keys.map((key) => {
           const cfg = fieldConfig[key] || {};
+          if (cfg.type === "hidden") return null;
 
-          if (cfg.type === "hidden") {
-            if (formData[key] === undefined) {
-              setFormData((s) => ({ ...s, [key]: "" }));
-            }
-            return null;
+          if (cfg.type === "select") {
+            return (
+              <div key={key}>
+                <label className="block text-sm text-gray-600 mb-1">
+                  {key}
+                </label>
+                <select
+                  value={formData[key] ?? ""}
+                  onChange={(e) => handleChange(key, e.target.value)}
+                  className={`w-full p-2 border rounded ${
+                    cfg.readOnly || viewOnly ? "bg-gray-300" : ""
+                  }`}
+                  disabled={cfg.readOnly || viewOnly}
+                  readOnly={cfg.readOnly || viewOnly}
+                >
+                  <option value="">-- izaberi --</option>
+                  {(cfg.options || []).map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
           }
 
           if ((mode === "edit" || mode === "view") && key === idField) {
@@ -143,49 +178,21 @@ const GenericForm = ({
             );
           }
 
-          if (cfg.type === "select") {
-            const opts = cfg.options || [];
-            return (
-              <div key={key}>
-                <label className="block text-sm text-gray-600 mb-1">
-                  {key}
-                </label>
-                <select
-                  value={formData[key] ?? ""}
-                  onChange={(e) => handleChange(key, e.target.value)}
-                  className={`w-full p-2 border rounded ${
-                    viewOnly ? "bg-gray-300" : ""
-                  }`}
-                  disabled={viewOnly}
-                >
-                  <option value="">-- izaberi --</option>
-                  {opts.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            );
-          }
+          let inputType = "text";
+          if (cfg.type === "date") inputType = "date";
+          if (cfg.type === "datetime") inputType = "datetime-local";
 
-          const inputType = isValid(parseISO(formData[key] ?? ""))
-            ? "datetime-local"
-            : "text";
-
-          const readOnly = cfg.readOnly || false;
           return (
             <div key={key}>
               <label className="block text-sm text-gray-600 mb-1">{key}</label>
               <input
                 type={inputType}
-                placeholder={key}
                 value={formData[key] ?? ""}
                 onChange={(e) => handleChange(key, e.target.value)}
                 className={`w-full p-2 border rounded ${
-                  readOnly || viewOnly ? "bg-gray-300" : ""
+                  cfg.readOnly || viewOnly ? "bg-gray-300" : ""
                 }`}
-                readOnly={readOnly || viewOnly}
+                readOnly={cfg.readOnly || viewOnly}
                 disabled={viewOnly}
               />
             </div>
@@ -193,7 +200,7 @@ const GenericForm = ({
         })}
       </div>
 
-      <div className="mt-12 flex gap-2">
+      <div className="mt-12 flex justify-center gap-2">
         {!viewOnly && (
           <button
             onClick={handleSubmit}
@@ -202,7 +209,6 @@ const GenericForm = ({
             Sačuvaj
           </button>
         )}
-
         <button
           onClick={onClose}
           className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"

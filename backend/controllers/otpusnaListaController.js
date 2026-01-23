@@ -27,7 +27,9 @@ export const otpusnaListaCreate = async (req, res) => {
 
 export const otpusnaListaReadAll = async (req, res) => {
   try {
-    const liste = await otpusnaListaModel.readAll();
+    const brlicenceFilter = req.pruzalac.brlicence;
+
+    const liste = await otpusnaListaModel.readAll(brlicenceFilter);
 
     if (!liste || liste.length === 0) {
       return res.status(404).json({

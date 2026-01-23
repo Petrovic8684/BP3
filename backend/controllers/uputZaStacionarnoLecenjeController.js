@@ -1,4 +1,5 @@
 import uputZaStacionarnoLecenjeModel from "../models/uputZaStacionarnoLecenjeModel.js";
+import { Uloge } from "../middleware/ulogeMiddleware.js";
 
 export const uputZaStacionarnoLecenjeCreate = async (req, res) => {
   try {
@@ -27,7 +28,14 @@ export const uputZaStacionarnoLecenjeCreate = async (req, res) => {
 
 export const uputZaStacionarnoLecenjeReadAll = async (req, res) => {
   try {
-    const uputi = await uputZaStacionarnoLecenjeModel.readAll();
+    const uloga = req.pruzalac.brlicence.charAt(4);
+
+    let brlicenceFilter = null;
+    if (uloga === Uloge.DOKTOR) {
+      brlicenceFilter = req.pruzalac.brlicence;
+    }
+
+    const uputi = await uputZaStacionarnoLecenjeModel.readAll(brlicenceFilter);
 
     if (!uputi || uputi.length === 0) {
       return res.status(404).json({

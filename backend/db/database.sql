@@ -354,10 +354,15 @@ AFTER INSERT OR UPDATE ON dijagnoza
 FOR EACH ROW
 EXECUTE FUNCTION notify_new_dijagnoza();
 
+DROP INDEX IF EXISTS idx_dijagnoza_embedding_ivfflat;
 CREATE INDEX idx_dijagnoza_embedding_ivfflat
 ON dijagnoza
 USING ivfflat (embedding vector_cosine_ops)
 WITH (lists = 100);
+
+DROP INDEX IF EXISTS idx_primalacusluge_prezimeime_lower;
+CREATE INDEX idx_primalacusluge_prezimeime_lower
+ON primalacusluge (LOWER(prezimeime) varchar_pattern_ops);
 
 ALTER TABLE stavkanalogazadavanjeinjekcija
 ADD COLUMN IF NOT EXISTS naziv VARCHAR(100);
@@ -567,7 +572,6 @@ EXECUTE FUNCTION func_update_jmbg_uput();
 CREATE OR REPLACE VIEW vw_lek_json AS
 SELECT
 jsonb_build_object(
-  'lek', jsonb_build_object(
     'jkl', l.jkl,
     'naziv', l.naziv,
     'jacina', l.jacina,
@@ -588,12 +592,10 @@ jsonb_build_object(
         jsonb_build_object(
           'atc', a.atc,
           'naziv', a.naziv,
-
           'tipsupstance', jsonb_build_object(
             'sifratipasup', ts.sifratipasup,
             'naziv', ts.naziv
           ),
-
           'leci', (
             SELECT jsonb_agg(
               jsonb_build_object(
@@ -603,27 +605,20 @@ jsonb_build_object(
               )
             )
             FROM leci lc
-            JOIN dijagnoza d 
-                 ON d.sifradijagnoze = lc.sifradijagnoze
+            JOIN dijagnoza d ON d.sifradijagnoze = lc.sifradijagnoze
             WHERE lc.atc = a.atc
           )
         )
       )
       FROM leksadrziaktivnasupstanca lsa
-      JOIN aktivnasupstanca a 
-           ON a.atc = lsa.atc
-      JOIN tipsupstance ts 
-           ON ts.sifratipasup = a.sifratipasup
+      JOIN aktivnasupstanca a ON a.atc = lsa.atc
+      JOIN tipsupstance ts ON ts.sifratipasup = a.sifratipasup
       WHERE lsa.jkl = l.jkl
     )
-
-  )
 ) AS data
 FROM lek l
-JOIN formaleka fl 
-     ON fl.sifraformeleka = l.sifraformeleka
-JOIN proizvodjac p 
-     ON p.sifraproizvodjaca = l.sifraproizvodjaca;
+JOIN formaleka fl ON fl.sifraformeleka = l.sifraformeleka
+JOIN proizvodjac p ON p.sifraproizvodjaca = l.sifraproizvodjaca;
 
 CREATE OR REPLACE FUNCTION trg_insert_lek_json()
 RETURNS TRIGGER AS $$
@@ -634,7 +629,7 @@ DECLARE
     supstanca jsonb;
     leci jsonb;
 BEGIN
-    lek_json := NEW.data->'lek';
+    lek_json := NEW.data;
     forma_json := lek_json->'formaleka';
     prov_json := lek_json->'proizvodjac';
 
@@ -719,8 +714,8 @@ DECLARE
     supstanca jsonb;
     leci jsonb;
 BEGIN
-    lek_json := NEW.data->'lek';
-    old_lek_json := OLD.data->'lek';
+    lek_json := NEW.data;
+    old_lek_json := OLD.data;
     forma_json := lek_json->'formaleka';
     prov_json := lek_json->'proizvodjac';
 
@@ -805,7 +800,7 @@ DECLARE
     jkl_val text;
     atc_list text[];
 BEGIN
-    lek_json := OLD.data->'lek';
+    lek_json := OLD.data;
     jkl_val := lek_json->>'jkl';
 
     SELECT array_agg(atc) INTO atc_list
@@ -1667,14 +1662,14 @@ INSERT INTO otpusnalista (sifraotpustneliste, predlog, epikriza, datumvreme, lec
 ('OTP0001', 'Kontrola kod kardiologa za 1 sedmicu; nastaviti antiagregacionu terapiju i statin; prilagoditi fizičku aktivnost.', 'Pacijent hospitalizovan zbog akutnog infarkta miokarda (I21). Izvedena terapija, stabilan pri otpustu.', '2026-01-12 10:00:00', '2026-01-05', '2026-01-12', 'HIS0001', 'I21'),
 ('OTP0002', 'Nastaviti oralnu terapiju po potrebi; kontrola kod infektologa za 7 dana.', 'Pacijent primljen zbog akutne pneumonije (J18). Stacionarna IV terapija, kliničko poboljšanje pri otpustu.', '2026-02-15 10:00:00', '2026-02-10', '2026-02-15', 'HIS0002', 'J18');
 
-INSERT INTO nalogzadavanjeinjekcija (sifranalogainj, brprotokola, sifrauputasl, brlicenceizvrsio) VALUES
-('NAJ001', 'BP-L-001', 'UPL001', 'LIC_T001'),
-('NAJ002', 'BP-L-002', 'UPL002', 'LIC_T002');
+INSERT INTO nalogzadavanjeinjekcija (sifranalogainj, brprotokola, sifrauputasl) VALUES
+('NAJ001', 'BP-L-001', 'UPL001'),
+('NAJ002', 'BP-L-002', 'UPL002');
 
-INSERT INTO stavkanalogazadavanjeinjekcija (brstavke, sifranalogainj, jkl, datumvreme, propisanoampula, datoampula) VALUES
-(1, 'NAJ001', '3801150', '2026-01-06 08:00:00', 1, 1),
-(1, 'NAJ002', '3801170', '2026-02-11 08:00:00', 1, 1),
-(2, 'NAJ002', '3801170', '2026-02-12 08:00:00', 1, 1);
+INSERT INTO stavkanalogazadavanjeinjekcija (brstavke, sifranalogainj, jkl, datumvreme, propisanoampula) VALUES
+(1, 'NAJ001', '3801150', '2026-01-06 08:00:00', 1),
+(1, 'NAJ002', '3801170', '2026-02-11 08:00:00', 1),
+(2, 'NAJ002', '3801170', '2026-02-12 08:00:00', 1);
 
 ALTER TABLE stavkanalogazadavanjeinjekcija
 ADD COLUMN IF NOT EXISTS doza NUMERIC(7,2);
@@ -1711,6 +1706,24 @@ BEFORE INSERT OR UPDATE OF datoampula, jkl
 ON stavkanalogazadavanjeinjekcija
 FOR EACH ROW
 EXECUTE FUNCTION func_calculate_doza_stavkanalogainj();
+
+CREATE OR REPLACE FUNCTION func_prevent_doza_update()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.doza IS DISTINCT FROM OLD.doza THEN
+        RAISE EXCEPTION 'Kolona doza se ne može direktno menjati.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trg_prevent_doza_update
+BEFORE UPDATE OF doza
+ON stavkanalogazadavanjeinjekcija
+FOR EACH ROW
+EXECUTE FUNCTION func_prevent_doza_update();
 
 CREATE OR REPLACE FUNCTION func_calculate_doza_after_update_jacina_in_lek()
 RETURNS TRIGGER AS
